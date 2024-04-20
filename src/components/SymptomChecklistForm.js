@@ -14,6 +14,15 @@ function SymptomChecklistForm({ userId }) {
     }
   };
 
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    addSymptomChecklist({
+      variables: {
+        userId,
+        symptoms
+      }
+    });
+  };
 
   return (
     <form onSubmit={handleSubmit}>
