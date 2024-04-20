@@ -2,7 +2,7 @@
 import { gql } from '@apollo/client';
 
 export const SIGNUP_MUTATION = gql`
-mutation signup($email: String!, $password: String!, $role: Role!) {
+mutation signupuser($email: String!, $password: String!, $role: Role!) {
   signup(email: $email, password: $password, role: $role) {
     _id
     email
