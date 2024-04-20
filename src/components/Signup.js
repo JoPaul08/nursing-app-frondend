@@ -11,7 +11,11 @@ function Signup() {
     });
     const navigate = useNavigate();
     const [signup, { loading, error }] = useMutation(SIGNUP_MUTATION, {
-       ,
+        variables: {
+            email: formData.email,
+            password: formData.password,
+            role: formData.role
+        },
         onCompleted: (data) => {
             // Redirect based on the role after successful signup
             if (data.signup.role === 'NURSE') {
