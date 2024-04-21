@@ -1,30 +1,29 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Import useNavigate and Link from React Router
+import { useNavigate } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+import { LOGIN_USER } from '../graphql/mutations'; // Assuming you have a LOGIN_USER mutation defined
 
 function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showMessage, setShowMessage] = useState(false);
   const navigate = useNavigate();
+  const [loginUser, { loading, error }] = useMutation(LOGIN_USER);
 
-  const predefinedPassword = 'password123'; // Predefined password
-
-  const handleLogin = (event) => {
+  const handleLogin = async (event) => {
     event.preventDefault();
-    // Check if the entered password matches the predefined password
-    if (password === predefinedPassword) {
-      // Redirect after a delay of 2 seconds
-      setShowMessage(false);
-      setTimeout(() => {
-        navigate('/info');
-      }, 2000);
-    } else {
-      // Show "Incorrect Password" message
-      setShowMessage(true);
-      // Reset showMessage state after 2 seconds
-      setTimeout(() => {
-        setShowMessage(false);
-      }, 2000);
+    try {
+      const { data } = await loginUser({
+        variables: {
+          email,
+          password
+        }
+      });
+      // Assuming the response includes some form of user token or session id
+      console.log('Login successful', data);
+      localStorage.setItem('token', data.login.token); // Store token in local storage
+      navigate('/info'); // Redirect to another route on successful login
+    } catch (error) {
+      console.error('Login error:', error.message);
     }
   };
 
@@ -34,31 +33,25 @@ function LoginForm() {
       justifyContent: 'center',
       alignItems: 'center',
       height: '100vh',
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', // Soft gradient background
+      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
     }}>
       <form onSubmit={handleLogin} style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        width: '375px', // iPhone-like width
-        height: '667px', // iPhone-like height
+        width: '375px',
+        height: '667px',
         border: '1px solid #ccc',
         padding: '20px',
-        borderRadius: '20px', // Rounded corners for modern look
+        borderRadius: '20px',
         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        background: '#fff', // White background for the form
+        background: '#fff',
       }}>
         <h3 style={{
           fontSize: '24px',
           marginBottom: '20px',
           color: '#333',
         }}>Login</h3>
-        <p style={{
-          marginBottom: '20px',
-          textAlign: 'center',
-          fontSize: '16px',
-          color: '#333',
-        }}>Welcome back!</p>
         <label style={{
           marginBottom: '10px',
           fontSize: '16px',
@@ -103,7 +96,7 @@ function LoginForm() {
             }}
           />
         </label>
-        <button type="submit" style={{
+        <button type="submit" disabled={loading} style={{
           padding: '12px 20px',
           backgroundColor: '#007bff',
           color: '#fff',
@@ -113,14 +106,12 @@ function LoginForm() {
           cursor: 'pointer',
           width: '100%',
         }}>Login</button>
-        <Link to="/" style={{ marginTop: '10px', textDecoration: 'none', color: '#007bff', fontSize: '16px' }}>Sign Up</Link>
+        {error && (
+          <p style={{ marginTop: '20px', color: 'red', fontSize: '16px' }}>Error: {error.message}</p>
+        )}
       </form>
-      {showMessage && (
-        <p style={{ marginTop: '20px', color: 'red', fontSize: '16px' }}>Incorrect Password</p>
-      )}
     </div>
   );
 }
 
 export default LoginForm;
-
