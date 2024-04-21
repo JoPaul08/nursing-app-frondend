@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Import Link and useNavigate from React Router
+import { Link } from 'react-router-dom'; // Import Link and useNavigate from React Router
 
 function VitalSignsForm({ userId }) {
   const [formState, setFormState] = useState({
