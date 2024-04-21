@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Import Link from React Router
+import { Link, useNavigate } from 'react-router-dom'; // Import Link and useNavigate from React Router
 
 function VitalSignsForm({ userId }) {
   const [formState, setFormState] = useState({
@@ -35,7 +35,7 @@ function VitalSignsForm({ userId }) {
   return (
     <div style={styles.container}>
       <div style={styles.dashboard}>
-        <h2>Vital Signs Dashboard</h2>
+        <h2 style={styles.banner}>Vital Signs Dashboard</h2>
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
             <label style={styles.label}>Body Temperature:</label>
@@ -78,42 +78,49 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     height: '100vh',
+    background: 'linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%)', // Refreshing blue gradient background
   },
   dashboard: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#ffffff',
     padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+    borderRadius: '12px',
+    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+    width: '90%',
+    maxWidth: '600px', // Maximum width to maintain form readability on larger screens
+  },
+  banner: {
+    fontSize: '22px',
+    color: '#007bff',
+    marginBottom: '20px',
+    textAlign: 'center',
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    width: '300px',
   },
   inputGroup: {
     marginBottom: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
+    width: '100%', // Full width to utilize the space within the form container
   },
   label: {
     marginBottom: '5px',
     fontSize: '16px',
+    color: '#333', // Subdued text color for better readability
   },
   input: {
     padding: '10px',
     border: '1px solid #ccc',
-    borderRadius: '5px',
+    borderRadius: '8px',
     fontSize: '16px',
-    width: '100%',
+    width: '100%', // Ensure input field uses the full width of its container
   },
   button: {
     padding: '12px 20px',
     backgroundColor: '#007bff',
-    color: '#fff',
+    color: 'white',
     border: 'none',
-    borderRadius: '5px',
+    borderRadius: '8px',
     fontSize: '16px',
     cursor: 'pointer',
     width: '100%',
@@ -133,9 +140,10 @@ const styles = {
   logout: {
     marginTop: '10px',
     textDecoration: 'none',
-    color: 'red', // Change color to red for logout link
+    color: 'red',
     fontSize: '16px',
   },
 };
 
 export default VitalSignsForm;
+

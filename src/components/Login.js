@@ -34,16 +34,19 @@ function LoginForm() {
       justifyContent: 'center',
       alignItems: 'center',
       height: '100vh',
+      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', // Soft gradient background
     }}>
       <form onSubmit={handleLogin} style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        width: '300px',
+        width: '375px', // iPhone-like width
+        height: '667px', // iPhone-like height
         border: '1px solid #ccc',
         padding: '20px',
-        borderRadius: '8px',
-        boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+        borderRadius: '20px', // Rounded corners for modern look
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        background: '#fff', // White background for the form
       }}>
         <h3 style={{
           fontSize: '24px',
@@ -56,12 +59,6 @@ function LoginForm() {
           fontSize: '16px',
           color: '#333',
         }}>Welcome back!</p>
-        <p style={{
-          marginBottom: '20px',
-          textAlign: 'center',
-          fontSize: '16px',
-          color: '#333',
-        }}>We are glad to see you</p>
         <label style={{
           marginBottom: '10px',
           fontSize: '16px',
@@ -119,10 +116,11 @@ function LoginForm() {
         <Link to="/" style={{ marginTop: '10px', textDecoration: 'none', color: '#007bff', fontSize: '16px' }}>Sign Up</Link>
       </form>
       {showMessage && (
-        <p style={{ marginTop: '20px', color: 'red' }}>Incorrect Password</p>
+        <p style={{ marginTop: '20px', color: 'red', fontSize: '16px' }}>Incorrect Password</p>
       )}
     </div>
   );
 }
 
 export default LoginForm;
+
