@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Import Link and useNavigate from React Router
+import { useNavigate, Link } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+import { ADD_PATIENT_INFO } from '../graphql/mutations'; // Ensure you have this mutation defined in your GraphQL schema
 
 function PatientInfoForm({ userId }) {
   const [formState, setFormState] = useState({
@@ -9,18 +11,25 @@ function PatientInfoForm({ userId }) {
     temperature: '',
     respiratoryRate: ''
   });
-  const [submitted, setSubmitted] = useState(false);
-  const navigate = useNavigate(); // Use useNavigate to navigate programmatically
+  const navigate = useNavigate();
+  const [addPatientInfo, { loading, error }] = useMutation(ADD_PATIENT_INFO);
 
   const handleChange = (event) => {
     setFormState({ ...formState, [event.target.name]: event.target.value });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Simulate backend interaction by displaying a confirmation message
-    setSubmitted(true);
-    // Reset form after submission
+    try {
+      await addPatientInfo({
+        variables: { userId, ...formState }
+      });
+      console.log('Patient info added successfully');
+      navigate('/info'); // Redirect or handle post-submission logic
+    } catch (err) {
+      console.error('Error adding patient info:', err.message);
+    }
+    // Reset form and state management if needed here
     setFormState({
       pulseRate: '',
       bloodPressure: '',
@@ -28,16 +37,6 @@ function PatientInfoForm({ userId }) {
       temperature: '',
       respiratoryRate: ''
     });
-    // Set timeout to hide confirmation message after 2 seconds
-    setTimeout(() => {
-      setSubmitted(false);
-    }, 2000);
-  };
-
-  const handleLogout = () => {
-    // Perform logout actions here
-    // For now, just redirect to login page
-    navigate('/login');
   };
 
   return (
@@ -46,17 +45,25 @@ function PatientInfoForm({ userId }) {
         <p style={styles.welcomeMessage}>Welcome to Daily Information</p>
       </div>
       <form onSubmit={handleSubmit} style={styles.form}>
-        <input name="pulseRate" type="number" placeholder="Pulse Rate" value={formState.pulseRate} onChange={handleChange} style={styles.input} />
-        <input name="bloodPressure" type="text" placeholder="Blood Pressure" value={formState.bloodPressure} onChange={handleChange} style={styles.input} />
-        <input name="weight" type="number" placeholder="Weight" value={formState.weight} onChange={handleChange} style={styles.input} />
-        <input name="temperature" type="number" placeholder="Temperature" value={formState.temperature} onChange={handleChange} style={styles.input} />
-        <input name="respiratoryRate" type="number" placeholder="Respiratory Rate" value={formState.respiratoryRate} onChange={handleChange} style={styles.input} />
-        <button type="submit" style={styles.button}>Submit Patient Info</button>
+        {Object.keys(formState).map(key => (
+          <input
+            key={key}
+            name={key}
+            type="number" // Assuming all inputs are number type, adjust if necessary
+            placeholder={key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')} // Format to readable label
+            value={formState[key]}
+            onChange={handleChange}
+            style={styles.input}
+          />
+        ))}
+        <button type="submit" disabled={loading} style={styles.button}>
+          Submit Patient Info
+        </button>
+        {error && <p style={{ color: 'red' }}>Error: {error.message}</p>}
       </form>
-      {submitted && <p style={styles.confirmation}>Daily information saved, THANK YOU.</p>}
-      <Link to="/Symptom" style={styles.link}>Go to your Symptom Checklist</Link> {/* Link to Symptom Checklist form */}
+      <Link to="/symptom" style={styles.link}>Go to your Symptom Checklist</Link>
       <br />
-      <Link to="/login" onClick={handleLogout} style={styles.link}>Log Out</Link> {/* Log Out link */}
+      <Link to="/login" onClick={() => navigate('/login')} style={styles.link}>Log Out</Link>
     </div>
   );
 }
@@ -106,11 +113,6 @@ const styles = {
     cursor: 'pointer',
     width: '100%',
   },
-  confirmation: {
-    margin: '10px 0',
-    color: 'green',
-    fontSize: '16px',
-  },
   link: {
     marginTop: '10px',
     textDecoration: 'none',
@@ -120,5 +122,3 @@ const styles = {
 };
 
 export default PatientInfoForm;
-
- 

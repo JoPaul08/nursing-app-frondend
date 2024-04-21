@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Import Link from React Router
+import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+import { ADD_SYMPTOM_CHECKLIST } from '../graphql/mutations'; // Ensure you have this mutation defined
 
-function SymptomChecklistForm() {
+function SymptomChecklistForm({ userId }) {
   const [symptoms, setSymptoms] = useState([]);
   const [submitted, setSubmitted] = useState(false);
+  const [addSymptomChecklist, { loading, error }] = useMutation(ADD_SYMPTOM_CHECKLIST);
+  const navigate = useNavigate();
 
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
@@ -14,12 +18,24 @@ function SymptomChecklistForm() {
     }
   };
 
-  const handleSubmit = () => {
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setSymptoms([]);
-    }, 2000); // Simulating a backend interaction with a 2-second delay
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      await addSymptomChecklist({
+        variables: {
+          userId,
+          symptoms
+        }
+      });
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setSymptoms([]);
+        navigate('/thank-you'); // Optional: navigate to a thank you page or back to dashboard
+      }, 2000);
+    } catch (err) {
+      console.error('Error submitting symptoms:', err.message);
+    }
   };
 
   return (
@@ -27,7 +43,7 @@ function SymptomChecklistForm() {
       <div style={styles.banner}>
         <h2 style={styles.bannerText}>Welcome to Symptom Checker</h2>
       </div>
-      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} style={styles.form}>
+      <form onSubmit={handleSubmit} style={styles.form}>
         <h3>Check Your Symptoms</h3>
         <label style={styles.checkbox}>
           <input type="checkbox" value="Fever" onChange={handleCheckboxChange} /> Fever
@@ -38,7 +54,8 @@ function SymptomChecklistForm() {
         <label style={styles.checkbox}>
           <input type="checkbox" value="Difficulty Breathing" onChange={handleCheckboxChange} /> Difficulty Breathing
         </label>
-        <button type="submit" style={styles.button}>Submit Symptoms</button>
+        <button type="submit" disabled={loading} style={styles.button}>Submit Symptoms</button>
+        {error && <p style={{ color: 'red', fontSize: '16px' }}>Error: {error.message}</p>}
         {submitted && <p style={styles.confirmation}>Symptoms saved successfully.</p>}
         <div>
           <h4>Selected Symptoms:</h4>
@@ -105,4 +122,3 @@ const styles = {
 };
 
 export default SymptomChecklistForm;
-

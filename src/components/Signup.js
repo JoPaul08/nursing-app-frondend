@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+import { SIGNUP_MUTATION } from '../graphql/mutations'; // Ensure you have this mutation defined in your GraphQL schema
 
 function Signup() {
     const [formData, setFormData] = useState({
@@ -8,6 +10,24 @@ function Signup() {
         role: 'nurse' // Default role set to nurse
     });
     const navigate = useNavigate();
+    const [signup, { loading, error }] = useMutation(SIGNUP_MUTATION, {
+        variables: {
+            email: formData.email,
+            password: formData.password,
+            role: formData.role
+        },
+        onCompleted: (data) => {
+            // Handle post-signup logic based on the role
+            if (data.signup.role === 'NURSE') {
+                navigate('/vital-signs');
+            } else if (data.signup.role === 'PATIENT') {
+                navigate('/info');
+            }
+        },
+        onError: (err) => {
+            console.error("Error signing up: ", err.message);
+        }
+    });
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -19,12 +39,7 @@ function Signup() {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        // Redirect based on the selected role
-        if (formData.role === 'nurse') {
-            navigate('/vital-signs');
-        } else if (formData.role === 'patient') {
-            navigate('/info');
-        }
+        signup(); // Execute the mutation
     };
 
     return (
@@ -33,15 +48,15 @@ function Signup() {
             justifyContent: 'center',
             alignItems: 'center',
             height: '100vh',
-            background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', // Soft gradient background
+            background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
         }}>
             <div style={{
-                width: '375px', // Mimicking iPhone width
+                width: '375px',
                 padding: '20px',
                 border: '1px solid #ccc',
-                borderRadius: '20px', // Rounded corners for modern look
+                borderRadius: '20px',
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                background: '#fff', // White background for the form
+                background: '#fff',
             }}>
                 <h1 style={{
                     fontSize: '24px',
@@ -98,7 +113,7 @@ function Signup() {
                         <option value="nurse">Nurse</option>
                         <option value="patient">Patient</option>
                     </select>
-                    <button type="submit" style={{
+                    <button type="submit" disabled={loading} style={{
                         padding: '12px 20px',
                         backgroundColor: '#007bff',
                         color: '#fff',
@@ -109,6 +124,12 @@ function Signup() {
                         width: '100%',
                     }}>Sign Up</button>
                 </form>
+                {error && <p style={{
+                    color: 'red',
+                    marginTop: '20px',
+                    textAlign: 'center',
+                    fontSize: '16px'
+                }}>Error signing up: {error.message}</p>}
                 <p style={{
                     marginTop: '20px',
                     textAlign: 'center',

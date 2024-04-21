@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Import Link and useNavigate from React Router
+import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+import { ADD_VITAL_SIGNS } from '../graphql/mutations'; // Make sure this mutation is defined in your GraphQL API
 
 function VitalSignsForm({ userId }) {
   const [formState, setFormState] = useState({
@@ -8,8 +10,13 @@ function VitalSignsForm({ userId }) {
     bloodPressure: '',
     respiratoryRate: ''
   });
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [submittedData, setSubmittedData] = useState(null);
+  const navigate = useNavigate();
+  const [addVitalSigns, { loading, error }] = useMutation(ADD_VITAL_SIGNS, {
+    onCompleted: () => {
+      // You could navigate to another page or show a success message
+      navigate('/success'); // Redirect to a success page, or adjust as necessary
+    }
+  });
 
   const handleChange = (event) => {
     setFormState({ ...formState, [event.target.name]: event.target.value });
@@ -17,19 +24,9 @@ function VitalSignsForm({ userId }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Save submitted data first
-    setSubmittedData(formState);
-    // No backend interaction, just reset the form and show confirmation message
-    setShowConfirmation(true);
-    setFormState({
-      bodyTemperature: '',
-      heartRate: '',
-      bloodPressure: '',
-      respiratoryRate: ''
+    addVitalSigns({
+      variables: { userId, ...formState }
     });
-    setTimeout(() => {
-      setShowConfirmation(false);
-    }, 3000);
   };
 
   return (
@@ -53,20 +50,12 @@ function VitalSignsForm({ userId }) {
             <label style={styles.label}>Respiratory Rate:</label>
             <input name="respiratoryRate" type="number" value={formState.respiratoryRate} onChange={handleChange} style={styles.input} />
           </div>
-          <button type="submit" style={styles.button}>Submit Vital Signs</button>
+          <button type="submit" disabled={loading} style={styles.button}>Submit Vital Signs</button>
+          {error && <p style={{ color: 'red' }}>Error: {error.message}</p>}
           <Link to="/clinical-visit" style={styles.link}>View Clinical Visit Details</Link>
           <Link to="/login" style={styles.logout}>Log out</Link>
         </form>
       </div>
-      {showConfirmation && (
-        <p style={styles.confirmation}>
-          Vital signs information saved: <br />
-          Body Temperature: {submittedData.bodyTemperature} <br />
-          Heart Rate: {submittedData.heartRate} <br />
-          Blood Pressure: {submittedData.bloodPressure} <br />
-          Respiratory Rate: {submittedData.respiratoryRate} <br />
-        </p>
-      )}
     </div>
   );
 }
@@ -78,7 +67,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     height: '100vh',
-    background: 'linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%)', // Refreshing blue gradient background
+    background: 'linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%)',
   },
   dashboard: {
     backgroundColor: '#ffffff',
@@ -86,7 +75,7 @@ const styles = {
     borderRadius: '12px',
     boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
     width: '90%',
-    maxWidth: '600px', // Maximum width to maintain form readability on larger screens
+    maxWidth: '600px',
   },
   banner: {
     fontSize: '22px',
@@ -101,19 +90,19 @@ const styles = {
   },
   inputGroup: {
     marginBottom: '20px',
-    width: '100%', // Full width to utilize the space within the form container
+    width: '100%',
   },
   label: {
     marginBottom: '5px',
     fontSize: '16px',
-    color: '#333', // Subdued text color for better readability
+    color: '#333',
   },
   input: {
     padding: '10px',
     border: '1px solid #ccc',
     borderRadius: '8px',
     fontSize: '16px',
-    width: '100%', // Ensure input field uses the full width of its container
+    width: '100%',
   },
   button: {
     padding: '12px 20px',
@@ -124,12 +113,6 @@ const styles = {
     fontSize: '16px',
     cursor: 'pointer',
     width: '100%',
-  },
-  confirmation: {
-    marginTop: '20px',
-    color: 'green',
-    fontSize: '16px',
-    textAlign: 'center',
   },
   link: {
     marginTop: '10px',
@@ -146,4 +129,3 @@ const styles = {
 };
 
 export default VitalSignsForm;
-
