@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { useMutation } from '@apollo/client';
 import { Link, useNavigate } from 'react-router-dom';
-import { SIGNUP_MUTATION } from '../graphql/mutations';
 
 function Signup() {
     const [formData, setFormData] = useState({
@@ -10,22 +8,6 @@ function Signup() {
         role: 'nurse' // Default role set to nurse
     });
     const navigate = useNavigate();
-    const [signup, { loading, error }] = useMutation(SIGNUP_MUTATION, {
-        variables: {
-            email: formData.email,
-            password: formData.password,
-            role: formData.role
-        },
-        onCompleted: (data) => {
-            // Redirect based on the role after successful signup
-            if (data.signup.role === 'NURSE') {
-                navigate('/vital-signs');
-            } else if (data.signup.role === 'PATIENT') {
-                navigate('/info');
-            }
-        },
-        onError: (error) => console.error("Error signing up: ", error.message)
-    });
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -37,7 +19,12 @@ function Signup() {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        signup();
+        // Redirect based on the selected role
+        if (formData.role === 'nurse') {
+            navigate('/vital-signs');
+        } else if (formData.role === 'patient') {
+            navigate('/info');
+        }
     };
 
     return (
@@ -65,9 +52,8 @@ function Signup() {
                         <option value="nurse">Nurse</option>
                         <option value="patient">Patient</option>
                     </select>
-                    <button type="submit" disabled={loading} style={{ padding: '12px 20px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', fontSize: '16px', cursor: 'pointer' }}>Sign Up</button>
+                    <button type="submit" style={{ padding: '12px 20px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', fontSize: '16px', cursor: 'pointer' }}>Sign Up</button>
                 </form>
-                {error && <p style={{ color: '#ff0000', marginTop: '20px', textAlign: 'center' }}>Error signing up: {error.message}</p>}
                 <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '16px', color: '#666' }}>Already have an account? <Link to="/login" style={{ color: '#007bff', textDecoration: 'none' }}>Log in</Link></p>
             </div>
         </div>
